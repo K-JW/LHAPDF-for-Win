@@ -1,3 +1,6 @@
+# Exclude external source
+LHAPDF/
+
 # Prerequisites
 *.d
 
