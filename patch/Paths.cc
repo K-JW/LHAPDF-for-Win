@@ -14,6 +14,7 @@
 
 // Add by KANG
 #if defined(_MSC_VER)
+// Refs: https://stackoverflow.com/questions/17258029
 int setenv(const char* name, const char* value, int overwrite)
 {
     int errcode = 0;
@@ -27,7 +28,7 @@ int setenv(const char* name, const char* value, int overwrite)
 }
 #else
 // Convert const char* to const wchar_t*
-// Refs. https://stackoverflow.com/questions/30409350/convert-const-char-to-const-wchar-t
+// Refs: https://stackoverflow.com/questions/30409350/convert-const-char-to-const-wchar-t
 #include <locale>
 #include <string>
 static std::wstring widen(const std::string& str)
