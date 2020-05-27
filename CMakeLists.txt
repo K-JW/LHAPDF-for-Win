@@ -13,6 +13,13 @@ add_compile_options("-fPIC")
 include_directories("${CMAKE_SOURCE_DIR}/LHAPDF/include")
 include_directories("${CMAKE_SOURCE_DIR}/LHAPDF/src/yamlcpp")
 
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "C:/ProgramData/LHAPDF" CACHE STRING "" FORCE)
+endif()
+message(STATUS "INSTALL: ${CMAKE_INSTALL_PREFIX}")
+set(LHAPDF_DATA "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "")
+message(STATUS "LHAPDF_DATA: ${LHAPDF_DATA}")
+
 # Add yamlcpp library
 set(YAML_DIR ${CMAKE_SOURCE_DIR}/LHAPDF/src/yamlcpp)
 set(YAML_SRC ${YAML_DIR}/aliasmanager.cpp ${YAML_DIR}/binary.cpp 
@@ -49,11 +56,11 @@ set(LHAPDF_SRC ${LHAPDF_DIR}/AlphaS_Analytic.cc ${LHAPDF_DIR}/AlphaS_Ipol.cc
 
 add_library(LHAPDF-static STATIC ${LHAPDF_SRC} ${CMAKE_SOURCE_DIR}/patch/Paths.cc)
 target_compile_definitions(LHAPDF-static PRIVATE YAMLCPP_API=3 YAML_NAMESPACE=LHAPDF_YAML 
-    LHAPDF_DATA_PREFIX="./")
+    LHAPDF_DATA_PREFIX="${LHAPDF_DATA}")
 
 add_library(LHAPDF SHARED ${LHAPDF_SRC} ${CMAKE_SOURCE_DIR}/patch/Paths.cc)
 target_compile_definitions(LHAPDF PRIVATE YAMLCPP_API=3 YAML_NAMESPACE=LHAPDF_YAML 
-    LHAPDF_DATA_PREFIX="./")
+    LHAPDF_DATA_PREFIX="${LHAPDF_DATA}")
 target_link_libraries(LHAPDF yamlcpp)
 
 #install
@@ -74,11 +81,11 @@ install (DIRECTORY ${CMAKE_SOURCE_DIR}/LHAPDF/include/LHAPDF
     FILES_MATCHING PATTERN "*.h")
 install (FILES ${CMAKE_SOURCE_DIR}/LHAPDF/lhapdf.conf 
     ${CMAKE_SOURCE_DIR}/LHAPDF/pdfsets.index 
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/LHAPDF)
+    DESTINATION ${LHAPDF_DATA}/LHAPDF)
 install (FILES ${CMAKE_SOURCE_DIR}/LHAPDF/bin/lhapdf 
     DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-# Set Env
-execute_process(
-    COMMAND powershell "[environment]::SetEnvironmentVariable(\"LHAPDF_DATA_PATH\", \"${CMAKE_INSTALL_PREFIX}/share\",\"User\")" 
-    OUTPUT_QUIET)
+# # Set Env
+# execute_process(
+#     COMMAND powershell "[environment]::SetEnvironmentVariable(\"LHAPDF_DATA_PATH\", \"${CMAKE_INSTALL_PREFIX}/share\",\"User\")" 
+#     OUTPUT_QUIET)
