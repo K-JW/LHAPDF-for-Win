@@ -31,6 +31,8 @@ if (MSVC)
     # MSVC doesn't define M_PI
     # https://blog.csdn.net/liu_feng_zi_/article/details/84816763?
     add_definitions(-D_USE_MATH_DEFINES)
+    # Ref. https://stackoverflow.com/questions/42070450/
+    set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
 endif()
 
 set(LHAPDF_DIR ${CMAKE_SOURCE_DIR}/LHAPDF/src)
@@ -53,3 +55,30 @@ add_library(LHAPDF SHARED ${LHAPDF_SRC} ${CMAKE_SOURCE_DIR}/patch/Paths.cc)
 target_compile_definitions(LHAPDF PRIVATE YAMLCPP_API=3 YAML_NAMESPACE=LHAPDF_YAML 
     LHAPDF_DATA_PREFIX="./")
 target_link_libraries(LHAPDF yamlcpp)
+
+#install
+if (MSVC)
+    install (FILES ${CMAKE_BINARY_DIR}/Release/LHAPDF-static.lib 
+        ${CMAKE_BINARY_DIR}/Release/LHAPDF.dll 
+        ${CMAKE_BINARY_DIR}/Release/yamlcpp.lib 
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+else()
+    install (FILES ${CMAKE_BINARY_DIR}/libLHAPDF-static.a 
+        ${CMAKE_BINARY_DIR}/libLHAPDF.dll 
+        ${CMAKE_BINARY_DIR}/libLHAPDF.dll.a 
+        ${CMAKE_BINARY_DIR}/libyamlcpp.a 
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+endif()
+install (DIRECTORY ${CMAKE_SOURCE_DIR}/LHAPDF/include/LHAPDF
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include 
+    FILES_MATCHING PATTERN "*.h")
+install (FILES ${CMAKE_SOURCE_DIR}/LHAPDF/lhapdf.conf 
+    ${CMAKE_SOURCE_DIR}/LHAPDF/pdfsets.index 
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/LHAPDF)
+install (FILES ${CMAKE_SOURCE_DIR}/LHAPDF/bin/lhapdf 
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
+# Set Env
+execute_process(
+    COMMAND powershell "[environment]::SetEnvironmentVariable(\"LHAPDF_DATA_PATH\", \"${CMAKE_INSTALL_PREFIX}/share\",\"User\")" 
+    OUTPUT_QUIET)
